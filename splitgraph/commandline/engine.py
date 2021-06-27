@@ -256,10 +256,24 @@ def _update_bar(progress, progress_text, bar, progress_data):
     help="Set the engine as the default engine in the config regardless of its name",
     is_flag=True,
 )
+@click.option(
+    "--share-dir",
+    help="Mount this directory into /shared in the engine",
+)
 @click.argument("name", default=DEFAULT_ENGINE)
 @click.password_option()
 def add_engine_c(
-    image, port, username, no_init, no_sgconfig, inject_source, no_pull, name, password, set_default
+    image,
+    port,
+    username,
+    no_init,
+    no_sgconfig,
+    inject_source,
+    no_pull,
+    name,
+    password,
+    set_default,
+    share_dir,
 ):
     """
     Create and start a Splitgraph engine.
@@ -306,6 +320,9 @@ def add_engine_c(
         source_volume = Mount(target="/splitgraph/splitgraph", source=source_path, type="bind")
         mounts.append(source_volume)
         click.echo("Source path: %s" % source_path)
+
+    if share_dir:
+        mounts.append(Mount(target="/shared", source=share_dir, type="bind"))
 
     try:
         container = client.containers.run(
